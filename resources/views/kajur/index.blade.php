@@ -1,43 +1,70 @@
 @extends('layouts.admin')
 @section('title', 'Persetujuan Kajur — PolLapor')
-@section('page-title', 'Persetujuan Eskalasi — Kajur')
 
 @section('content')
-    <div class="card">
-        <div class="card-header">
-            Antrean Eskalasi untuk Kajur
-            <span class="text-sm text-muted">{{ $laporans->total() }} laporan</span>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Persetujuan Eskalasi</h1>
+            <p class="text-sm text-gray-500 mt-1">Daftar laporan fasilitas yang membutuhkan persetujuan Kepala Jurusan</p>
         </div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
+        <div class="bg-orange-50 text-orange-700 px-4 py-2 rounded-lg text-sm font-bold border border-orange-100 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            {{ $laporans->total() }} Menunggu Review
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100">
                     <tr>
-                        <th>ID</th>
-                        <th>Sarana</th>
-                        <th>Lokasi</th>
-                        <th>Teknisi</th>
-                        <th>Catatan</th>
-                        <th>Aksi</th>
+                        <th class="px-6 py-4">ID Laporan</th>
+                        <th class="px-6 py-4">Informasi Sarana</th>
+                        <th class="px-6 py-4">Dikelola Oleh</th>
+                        <th class="px-6 py-4">Catatan Teknisi</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-50">
                     @forelse($laporans as $laporan)
-                    <tr>
-                        <td class="text-sm text-muted">{{ substr($laporan->formulir_id, 0, 8) }}...</td>
-                        <td><strong>{{ $laporan->nama_sarana }}</strong></td>
-                        <td>{{ $laporan->lokasi?->nama_ruangan ?? '-' }}</td>
-                        <td>{{ $laporan->penanganan?->teknisi?->nama_lengkap ?? '-' }}</td>
-                        <td class="truncate">{{ $laporan->penanganan?->catatan_progres ?? '-' }}</td>
-                        <td>
-                            <a href="{{ route('kajur.show', $laporan->formulir_id) }}" class="btn btn-primary btn-sm">
+                    <tr class="hover:bg-gray-50/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <span class="font-mono text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ substr($laporan->formulir_id, 0, 8) }}</span>
+                            <div class="text-[10px] text-gray-400 mt-1">{{ $laporan->created_at->format('d M Y') }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-gray-900">{{ $laporan->nama_sarana }}</div>
+                            <div class="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                {{ $laporan->lokasi?->nama_ruangan ?? '-' }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+                                    {{ substr($laporan->penanganan?->teknisi?->nama_lengkap ?? 'T', 0, 1) }}
+                                </div>
+                                <span class="font-medium text-gray-700">{{ $laporan->penanganan?->teknisi?->nama_lengkap ?? '-' }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 max-w-xs">
+                            <p class="text-gray-500 truncate" title="{{ $laporan->penanganan?->catatan_progres }}">{{ $laporan->penanganan?->catatan_progres ?? '-' }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{{ route('kajur.show', $laporan->formulir_id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-600 hover:text-white transition-colors">
                                 Review
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </a>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted" style="padding:40px;">
-                            Tidak ada eskalasi menunggu persetujuan.
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <h3 class="text-gray-900 font-medium">Semua Bersih!</h3>
+                            <p class="text-sm text-gray-500 mt-1">Tidak ada laporan eskalasi yang menunggu persetujuan Anda saat ini.</p>
                         </td>
                     </tr>
                     @endforelse
@@ -47,6 +74,8 @@
     </div>
 
     @if($laporans->hasPages())
-    <div class="pagination">{{ $laporans->links('pagination::simple-default') }}</div>
+    <div class="mt-6">
+        {{ $laporans->links('pagination::tailwind') }}
+    </div>
     @endif
 @endsection

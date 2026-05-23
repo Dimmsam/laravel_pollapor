@@ -50,6 +50,6 @@ class DashboardController extends Controller
             'total' => FormulirLaporan::count(),
         ];
 
-        return view('dashboard.index', compact('laporans', 'stats'));
+        return view('dashboard.dashboard_utama', compact('laporans', 'stats'));
     }
 }

@@ -10,6 +10,7 @@ class Pengguna extends Authenticatable
     protected $primaryKey = 'user_id';
     public $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'user_id',
@@ -18,6 +19,7 @@ class Pengguna extends Authenticatable
         'password',
         'role',
         'unit_jurusan',
+        'keahlian',
         'is_busy',
     ];
 

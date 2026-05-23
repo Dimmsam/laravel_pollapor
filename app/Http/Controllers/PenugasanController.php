@@ -21,7 +21,7 @@ class PenugasanController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
-        return view('dashboard.show', compact('laporan', 'teknisiList'));
+        return view('dashboard.detail_laporan', compact('laporan', 'teknisiList'));
     }
 
     public function assign(Request $request, string $formulirId)
