@@ -3,24 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\FormulirLaporan;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    public function index()
+    {
+        // ─── Statistik ringkas ─────────────────────────────────────────
+        $stats = [
+            'total'            => FormulirLaporan::count(),
+            'menunggu'         => FormulirLaporan::menunggu()->count(),
+            'ditugaskan'       => FormulirLaporan::ditugaskan()->count(),
+            'sedang_dikerjakan'=> FormulirLaporan::sedangDikerjakan()->count(),
+            'selesai'          => FormulirLaporan::selesai()->count(),
+            'diteruskan'       => FormulirLaporan::diteruskanKePusat()->count(),
+        ];
+
+        // ─── Laporan terbaru (5) ───────────────────────────────────────
+        $laporanTerbaru = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan.teknisi'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // ─── Statistik mingguan (7 hari terakhir) ─────────────────────
+        $statistikMingguan = collect(range(6, 0))->map(function ($daysAgo) {
+            $date = now()->subDays($daysAgo);
+            return [
+                'label' => $date->translatedFormat('D'),
+                'count' => FormulirLaporan::whereDate('created_at', $date->toDateString())->count(),
+            ];
+        });
+
+        // ─── Teknisi aktif ────────────────────────────────────────────
+        $teknisiAktif = Pengguna::where('role', 'teknisi')
+            ->limit(3)
+            ->get();
+
+        return view('dashboard.dashboard_utama', compact(
+            'stats',
+            'laporanTerbaru',
+            'statistikMingguan',
+            'teknisiAktif',
+        ));
+    }
+
     /**
-     * UC-05: Dashboard Laporan Masuk
+     * Halaman daftar laporan (terpisah dari dashboard)
      */
-    public function index(Request $request)
+    public function laporan(Request $request)
     {
         $query = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan'])
             ->orderBy('created_at', 'desc');
 
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -30,7 +69,6 @@ class DashboardController extends Controller
             });
         }
 
-        // Filter by tanggal
         if ($request->filled('dari_tanggal')) {
             $query->whereDate('created_at', '>=', $request->dari_tanggal);
         }
@@ -40,16 +78,15 @@ class DashboardController extends Controller
 
         $laporans = $query->paginate(15)->withQueryString();
 
-        // Hitung statistik ringkas
         $stats = [
-            'menunggu' => FormulirLaporan::menunggu()->count(),
-            'ditugaskan' => FormulirLaporan::ditugaskan()->count(),
+            'menunggu'          => FormulirLaporan::menunggu()->count(),
+            'ditugaskan'        => FormulirLaporan::ditugaskan()->count(),
             'sedang_dikerjakan' => FormulirLaporan::sedangDikerjakan()->count(),
-            'selesai' => FormulirLaporan::selesai()->count(),
-            'diteruskan' => FormulirLaporan::diteruskanKePusat()->count(),
-            'total' => FormulirLaporan::count(),
+            'selesai'           => FormulirLaporan::selesai()->count(),
+            'diteruskan'        => FormulirLaporan::diteruskanKePusat()->count(),
+            'total'             => FormulirLaporan::count(),
         ];
 
-        return view('dashboard.dashboard_utama', compact('laporans', 'stats'));
+        return view('dashboard.laporan_list', compact('laporans', 'stats'));
     }
 }

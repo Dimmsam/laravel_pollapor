@@ -17,8 +17,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // ─── Protected Routes (Admin Jurusan + Kajur) ──────────────────────────────
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    // Dashboard Laporan Masuk (UC-05)
+    // Dashboard (UC-05)
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Laporan — halaman terpisah dengan filter lengkap
+    Route::get('/laporan', [DashboardController::class, 'laporan'])->name('laporan.index');
 
     // Detail Laporan + Penugasan Teknisi (UC-05)
     Route::get('/laporan/{formulirId}', [PenugasanController::class, 'show'])->name('laporan.show');
@@ -45,4 +48,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Statistik (UC-09)
     Route::get('/statistik', [StatistikController::class, 'index'])->name('statistik.index');
     Route::get('/statistik/performa', [StatistikController::class, 'performaTeknisi'])->name('statistik.performa');
+
 });
