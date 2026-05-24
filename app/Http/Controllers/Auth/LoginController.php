@@ -34,7 +34,10 @@ class LoginController extends Controller
         ]);
 
         // Autentikasi via Supabase Auth REST API
-        $response = \Illuminate\Support\Facades\Http::withHeaders([
+        $response = \Illuminate\Support\Facades\Http::withOptions([
+            'verify' => false,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+        ])->timeout(30)->withHeaders([
             'apikey' => env('SUPABASE_ANON_KEY'),
             'Content-Type' => 'application/json',
         ])->post(env('SUPABASE_URL') . '/auth/v1/token?grant_type=password', [
