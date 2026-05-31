@@ -27,13 +27,10 @@ class Pengguna extends Authenticatable
         'password',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'is_busy' => 'boolean',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'is_busy' => 'boolean',
+        'password' => 'hashed',
+    ];
 
     // ─── Scopes ────────────────────────────────────────────────────────────
 

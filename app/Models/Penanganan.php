@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Pengguna;
 
 class Penanganan extends Model
 {
@@ -75,5 +76,15 @@ class Penanganan extends Model
             self::STATUS_SELESAI => 'Selesai',
             default => ucfirst(str_replace('_', ' ', $this->status_penanganan ?? '')),
         };
+    }
+
+    protected static function booted()
+    {
+        static::updated(function (self $penanganan) {
+            if ($penanganan->wasChanged('status_penanganan') && $penanganan->status_penanganan === self::STATUS_SELESAI) {
+                Pengguna::where('user_id', $penanganan->teknisi_id)
+                    ->update(['is_busy' => false]);
+            }
+        });
     }
 }

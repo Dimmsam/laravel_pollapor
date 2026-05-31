@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FormulirLaporan;
 use App\Models\Tracking;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,8 @@ class KajurController extends Controller
     public function show(string $formulirId)
     {
         $laporan = FormulirLaporan::with([
-            'pelapor', 'lokasi',
+            'pelapor',
+            'lokasi',
             'penanganan.teknisi',
             'trackings.aktor',
         ])->findOrFail($formulirId);
@@ -50,6 +52,12 @@ class KajurController extends Controller
                 . ($request->catatan ? 'Catatan: ' . $request->catatan : ''),
             'created_at' => $now,
         ]);
+
+        // Jika ada penanganan, tandai teknisi kembali tersedia
+        if ($laporan->penanganan) {
+            Pengguna::where('user_id', $laporan->penanganan->teknisi_id)
+                ->update(['is_busy' => false]);
+        }
 
         return redirect()->route('kajur.index')
             ->with('success', 'Eskalasi disetujui dan diteruskan ke UPT-PP.');

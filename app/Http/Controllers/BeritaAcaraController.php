@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FormulirLaporan;
 use App\Models\Tracking;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,8 @@ class BeritaAcaraController extends Controller
     public function generate(string $formulirId)
     {
         $laporan = FormulirLaporan::with([
-            'pelapor', 'lokasi',
+            'pelapor',
+            'lokasi',
             'penanganan.teknisi',
             'trackings.aktor',
         ])->findOrFail($formulirId);
@@ -59,6 +61,12 @@ class BeritaAcaraController extends Controller
             'pesan_narasi' => 'Laporan dikunci oleh Admin. Tidak dapat diubah lagi.',
             'created_at' => $now,
         ]);
+
+        // Jika ada penanganan, tandai teknisi kembali tersedia
+        if ($laporan->penanganan) {
+            Pengguna::where('user_id', $laporan->penanganan->teknisi_id)
+                ->update(['is_busy' => false]);
+        }
 
         return redirect()->route('berita-acara.index')
             ->with('success', 'Laporan berhasil dikunci.');
