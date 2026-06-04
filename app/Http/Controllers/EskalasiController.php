@@ -13,12 +13,9 @@ class EskalasiController extends Controller
 {
     public function index()
     {
-        // Laporan selesai dari teknisi yang perlu di-review admin
+        // Laporan yang sudah diteruskan untuk divalidasi admin/kajur
         $laporans = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan.teknisi'])
-            ->whereHas('penanganan', function ($q) {
-                $q->where('status_penanganan', Penanganan::STATUS_SELESAI);
-            })
-            ->where('status', FormulirLaporan::STATUS_SEDANG_DIKERJAKAN)
+            ->where('status', FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT)
             ->orderBy('updated_at', 'desc')
             ->paginate(15);
 
@@ -44,15 +41,15 @@ class EskalasiController extends Controller
 
         $laporan->update([
             'status' => FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT,
-            'is_locked' => true,
             'updated_at' => $now,
+            'is_locked' => true,
         ]);
 
         Tracking::create([
             'tracking_id' => (string) Str::uuid(),
             'formulir_id' => $formulirId,
             'aktor_id' => auth()->user()->user_id,
-            'jenis_event' => Tracking::EVENT_DITERUSKAN_KE_PUSAT,
+            'jenis_event' => Tracking::EVENT_ESKALASI_DISETUJUI,
             'pesan_narasi' => 'Admin Jurusan meneruskan laporan ke pusat (UPT-PP). '
                 . ($request->catatan ? 'Catatan: ' . $request->catatan : ''),
             'created_at' => $now,
@@ -93,7 +90,7 @@ class EskalasiController extends Controller
             'tracking_id' => (string) Str::uuid(),
             'formulir_id' => $formulirId,
             'aktor_id' => auth()->user()->user_id,
-            'jenis_event' => Tracking::EVENT_PENANGANAN_DIMULAI,
+            'jenis_event' => Tracking::EVENT_ESKALASI_DITOLAK,
             'pesan_narasi' => 'Admin Jurusan menolak eskalasi. Alasan: ' . $request->alasan_tolak,
             'created_at' => $now,
         ]);

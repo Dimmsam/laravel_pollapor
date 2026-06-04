@@ -95,15 +95,20 @@ class FormulirLaporan extends Model
         return $this->belongsTo(Pengguna::class, 'pelapor_id', 'user_id');
     }
 
+    public function penangananList()
+    {
+        return $this->hasMany(Penanganan::class, 'formulir_id', 'formulir_id');
+    }
+
     public function penanganan()
     {
-        return $this->hasOne(Penanganan::class, 'formulir_id', 'formulir_id');
+        return $this->hasOne(Penanganan::class, 'formulir_id', 'formulir_id')->latest('updated_at');
     }
 
     public function trackings()
     {
         return $this->hasMany(Tracking::class, 'formulir_id', 'formulir_id')
-                    ->orderBy('created_at', 'asc');
+            ->orderBy('created_at', 'asc');
     }
 
     public function lokasi()

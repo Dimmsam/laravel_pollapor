@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FormulirLaporan;
+use App\Models\Penanganan;
 use App\Models\Tracking;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class KajurController extends Controller
     public function index()
     {
         $laporans = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan.teknisi'])
-            ->diteruskanKePusat()
+            ->where('status', FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT)
             ->orderBy('updated_at', 'desc')
             ->paginate(15);
 
@@ -47,7 +48,7 @@ class KajurController extends Controller
             'tracking_id' => (string) Str::uuid(),
             'formulir_id' => $formulirId,
             'aktor_id' => auth()->user()->user_id,
-            'jenis_event' => Tracking::EVENT_DITERUSKAN_KE_PUSAT,
+            'jenis_event' => Tracking::EVENT_KAJUR_APPROVE,
             'pesan_narasi' => 'Kepala Jurusan menyetujui eskalasi ke UPT-PP. Laporan dikunci. '
                 . ($request->catatan ? 'Catatan: ' . $request->catatan : ''),
             'created_at' => $now,
@@ -61,5 +62,39 @@ class KajurController extends Controller
 
         return redirect()->route('kajur.index')
             ->with('success', 'Eskalasi disetujui dan diteruskan ke UPT-PP.');
+    }
+
+    public function tolakEskalasi(Request $request, string $formulirId)
+    {
+        $request->validate([
+            'alasan_tolak' => 'required|string|max:500',
+        ]);
+
+        $laporan = FormulirLaporan::with('penanganan')->findOrFail($formulirId);
+        $now = now();
+
+        $laporan->update([
+            'status' => FormulirLaporan::STATUS_SEDANG_DIKERJAKAN,
+            'updated_at' => $now,
+        ]);
+
+        if ($laporan->penanganan) {
+            $laporan->penanganan->update([
+                'status_penanganan' => Penanganan::STATUS_MULAI,
+                'updated_at' => $now,
+            ]);
+        }
+
+        Tracking::create([
+            'tracking_id' => (string) Str::uuid(),
+            'formulir_id' => $formulirId,
+            'aktor_id' => auth()->user()->user_id,
+            'jenis_event' => Tracking::EVENT_ESKALASI_DITOLAK,
+            'pesan_narasi' => 'Kepala Jurusan menolak eskalasi. Alasan: ' . $request->alasan_tolak,
+            'created_at' => $now,
+        ]);
+
+        return redirect()->route('kajur.index')
+            ->with('success', 'Eskalasi ditolak. Laporan dikembalikan ke teknisi.');
     }
 }

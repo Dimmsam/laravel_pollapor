@@ -132,10 +132,12 @@
             
             <div class="mt-6 bg-red-50 rounded-2xl border border-red-100 p-6 text-center">
                 <p class="text-xs text-red-600 font-medium mb-3">Tolak jika dirasa laporan tidak perlu ditangani UPT-PP.</p>
-                <form method="POST" action="#">
+                <form method="POST" action="{{ route('kajur.tolak', $laporan->formulir_id) }}">
                     @csrf
-                    <!-- Endpoint penolakan sepertinya belum ada di form kajur aslinya, kita beri dummy dulu -->
-                    <button type="button" class="px-6 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors">Tolak Eskalasi</button>
+                    <div class="mb-4 text-left">
+                        <textarea name="alasan_tolak" rows="3" class="w-full px-4 py-3 bg-white border border-red-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all resize-none" placeholder="Alasan penolakan..." required></textarea>
+                    </div>
+                    <button type="submit" class="w-full px-6 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors" onclick="return confirm('Tolak eskalasi dan kembalikan ke teknisi?')">Tolak Eskalasi</button>
                 </form>
             </div>
         </div>

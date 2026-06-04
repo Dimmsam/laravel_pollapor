@@ -57,7 +57,7 @@ class BeritaAcaraController extends Controller
             'tracking_id' => (string) Str::uuid(),
             'formulir_id' => $formulirId,
             'aktor_id' => auth()->user()->user_id,
-            'jenis_event' => Tracking::EVENT_PENANGANAN_SELESAI,
+            'jenis_event' => Tracking::EVENT_LAPORAN_DIKUNCI,
             'pesan_narasi' => 'Laporan dikunci oleh Admin. Tidak dapat diubah lagi.',
             'created_at' => $now,
         ]);
