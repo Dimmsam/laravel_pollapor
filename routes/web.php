@@ -26,8 +26,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Detail Laporan + Penugasan Teknisi (UC-05)
     Route::get('/laporan/{formulirId}', [PenugasanController::class, 'show'])->name('laporan.show');
     Route::post('/laporan/{formulirId}/assign', [PenugasanController::class, 'assign'])->name('laporan.assign');
-    Route::post('/laporan/{formulirId}/tolak', [PenugasanController::class, 'tolakLaporan'])->name('laporan.tolak');
-    Route::post('/laporan/{formulirId}/ubah-status', [PenugasanController::class, 'ubahStatus'])->name('laporan.ubah-status');
+    Route::post('/laporan/{formulirId}/tolak', [PenugasanController::class, 'tolak'])->name('laporan.tolak');
+    Route::post('/laporan/{formulirId}/prioritas', [PenugasanController::class, 'ubahPrioritas'])->name('laporan.prioritas');
 
     // Eskalasi (UC-06)
     Route::get('/eskalasi', [EskalasiController::class, 'index'])->name('eskalasi.index');
