@@ -48,7 +48,9 @@ class FormulirLaporan extends Model
     const STATUS_MENUNGGU = 'menunggu';
     const STATUS_DITUGASKAN = 'ditugaskan';
     const STATUS_SEDANG_DIKERJAKAN = 'sedang_dikerjakan';
+    const STATUS_DITOLAK_ESKALASI = 'ditolak_eskalasi';
     const STATUS_SELESAI = 'selesai';
+    const STATUS_MENUNGGU_PERSETUJUAN_KAJUR = 'menunggu_persetujuan_kajur';
     const STATUS_DITERUSKAN_KE_PUSAT = 'diteruskan_ke_pusat';
 
     // ─── Scopes ────────────────────────────────────────────────────────────
@@ -71,6 +73,11 @@ class FormulirLaporan extends Model
     public function scopeSelesai($query)
     {
         return $query->where('status', self::STATUS_SELESAI);
+    }
+
+    public function scopeMenungguPersetujuanKajur($query)
+    {
+        return $query->where('status', self::STATUS_MENUNGGU_PERSETUJUAN_KAJUR);
     }
 
     public function scopeDiteruskanKePusat($query)
@@ -119,7 +126,9 @@ class FormulirLaporan extends Model
             self::STATUS_MENUNGGU => 'Menunggu',
             self::STATUS_DITUGASKAN => 'Ditugaskan',
             self::STATUS_SEDANG_DIKERJAKAN => 'Sedang Dikerjakan',
+            self::STATUS_DITOLAK_ESKALASI => 'Eskalasi Ditolak',
             self::STATUS_SELESAI => 'Selesai',
+            self::STATUS_MENUNGGU_PERSETUJUAN_KAJUR => 'Menunggu Persetujuan Kajur',
             self::STATUS_DITERUSKAN_KE_PUSAT => 'Diteruskan ke Pusat',
             default => ucfirst(str_replace('_', ' ', $this->status ?? '')),
         };
@@ -131,7 +140,9 @@ class FormulirLaporan extends Model
             self::STATUS_MENUNGGU => 'yellow',
             self::STATUS_DITUGASKAN => 'blue',
             self::STATUS_SEDANG_DIKERJAKAN => 'orange',
+            self::STATUS_DITOLAK_ESKALASI => 'red',
             self::STATUS_SELESAI => 'green',
+            self::STATUS_MENUNGGU_PERSETUJUAN_KAJUR => 'purple',
             self::STATUS_DITERUSKAN_KE_PUSAT => 'red',
             default => 'gray',
         };

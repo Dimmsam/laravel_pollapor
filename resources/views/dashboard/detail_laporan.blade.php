@@ -306,13 +306,14 @@
             </div>
             <div class="p-4 grid grid-cols-2 gap-2.5">
 
-                {{-- Ubah Status --}}
+                {{-- Ubah Prioritas --}}
                 <button type="button"
+                    onclick="openPrioritasModal()"
                     class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-all group">
                     <div class="w-9 h-9 rounded-lg bg-gray-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-                        <svg class="w-4.5 h-4.5 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <svg class="w-4.5 h-4.5 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-                    <span class="text-xs font-semibold">Ubah Status</span>
+                    <span class="text-xs font-semibold text-center">Ubah Prioritas<br><span class="text-[10px] text-gray-400">({{ ucfirst(str_replace('_', ' ', $laporan->prioritas ?? 'Biasa')) }})</span></span>
                 </button>
 
                 {{-- Cetak --}}
@@ -326,7 +327,11 @@
 
                 {{-- Tolak --}}
                 <button type="button"
-                    onclick="alert('Fitur Tolak Laporan belum tersedia.')"
+                    @if($laporan->status == 'menunggu' || $laporan->status == 'ditolak')
+                        onclick="openTolakModal()"
+                    @else
+                        onclick="alert('Laporan yang sudah ditugaskan tidak dapat ditolak dari menu ini.')"
+                    @endif
                     class="flex flex-col items-center gap-2 p-4 rounded-lg border border-red-100 bg-red-50 hover:bg-red-100 hover:border-red-200 text-red-500 transition-all group">
                     <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -348,5 +353,89 @@
 
     </div>
 </div>
+
+{{-- MODAL UBAH PRIORITAS --}}
+<div id="modalPrioritas" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform scale-95 transition-transform duration-200">
+        <form method="POST" action="{{ route('laporan.prioritas', $laporan->formulir_id) }}">
+            @csrf
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Ubah Prioritas Laporan</h3>
+                <button type="button" onclick="closePrioritasModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-500 mb-4">Ubah prioritas laporan ini. Prioritas yang dipilih akan muncul pada aplikasi teknisi.</p>
+                <div class="space-y-3">
+                    <label class="block">
+                        <select name="prioritas" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="biasa" {{ ($laporan->prioritas ?? 'biasa') == 'biasa' ? 'selected' : '' }}>Biasa (Low)</option>
+                            <option value="urgent" {{ ($laporan->prioritas ?? 'biasa') == 'urgent' ? 'selected' : '' }}>Urgent (Medium)</option>
+                            <option value="sangat_urgent" {{ ($laporan->prioritas ?? 'biasa') == 'sangat_urgent' ? 'selected' : '' }}>Sangat Urgent (High)</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-xl flex justify-end gap-3">
+                <button type="button" onclick="closePrioritasModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Batal</button>
+                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- MODAL TOLAK LAPORAN --}}
+<div id="modalTolak" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform scale-95 transition-transform duration-200">
+        <form method="POST" action="{{ route('laporan.tolak', $laporan->formulir_id) }}">
+            @csrf
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-red-600 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Tolak Laporan
+                </h3>
+                <button type="button" onclick="closeTolakModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Anda yakin ingin menolak laporan ini? Laporan yang ditolak tidak akan dilanjutkan ke tahap penanganan.</p>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Alasan Penolakan (Opsional)</label>
+                    <textarea name="alasan_penolakan" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Tuliskan alasan penolakan laporan..."></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-xl flex justify-end gap-3">
+                <button type="button" onclick="closeTolakModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Batal</button>
+                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm">Tolak Laporan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPrioritasModal() {
+        const modal = document.getElementById('modalPrioritas');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.children[0].classList.remove('scale-95'), 10);
+    }
+    function closePrioritasModal() {
+        const modal = document.getElementById('modalPrioritas');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+    
+    function openTolakModal() {
+        const modal = document.getElementById('modalTolak');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.children[0].classList.remove('scale-95'), 10);
+    }
+    function closeTolakModal() {
+        const modal = document.getElementById('modalTolak');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+</script>
 
 @endsection

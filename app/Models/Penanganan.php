@@ -42,6 +42,7 @@ class Penanganan extends Model
 
     const STATUS_MULAI = 'mulai_dikerjakan';
     const STATUS_SELESAI = 'selesai';
+    const STATUS_DITOLAK_ESKALASI = 'ditolak_eskalasi';
 
     // ─── Relations ─────────────────────────────────────────────────────────
 
