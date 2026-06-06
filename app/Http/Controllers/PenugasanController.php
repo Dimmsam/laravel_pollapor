@@ -66,6 +66,17 @@ class PenugasanController extends Controller
                 'created_at' => $now,
             ]);
 
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'notifikasi_id' => (string) Str::uuid(),
+                'penerima_id' => $request->teknisi_id,
+                'formulir_id' => $formulirId,
+                'judul' => 'Tugas Baru: ' . $laporan->nama_sarana,
+                'pesan' => 'Anda ditugaskan untuk menangani laporan kerusakan. Silakan cek daftar tugas.',
+                'tipe' => 'info',
+                'is_read' => false,
+                'created_at' => $now,
+            ]);
+
             return redirect()->route('laporan.index')
                 ->with('success', 'Teknisi berhasil ditugaskan.');
         });
@@ -123,5 +134,70 @@ class PenugasanController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Status laporan berhasil diubah secara manual.');
+    }
+
+    public function tolak(Request $request, string $formulirId)
+    {
+        $request->validate([
+            'alasan_penolakan' => 'nullable|string',
+        ]);
+
+        $laporan = FormulirLaporan::findOrFail($formulirId);
+
+        if ($laporan->penanganan) {
+            return back()->with('error', 'Laporan yang sudah ditugaskan tidak dapat ditolak dari menu ini.');
+        }
+
+        $now = now();
+        $laporan->update([
+            'status' => 'ditolak',
+            'updated_at' => $now,
+        ]);
+
+        $alasan = $request->alasan_penolakan ? ' Alasan: ' . $request->alasan_penolakan : '';
+
+        Tracking::create([
+            'tracking_id' => (string) Str::uuid(),
+            'formulir_id' => $formulirId,
+            'aktor_id' => auth()->user()->user_id,
+            'jenis_event' => 'laporan_ditolak',
+            'pesan_narasi' => 'Admin Jurusan menolak laporan.' . $alasan,
+            'created_at' => $now,
+        ]);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Laporan berhasil ditolak.');
+    }
+
+    public function ubahPrioritas(Request $request, string $formulirId)
+    {
+        $request->validate([
+            'prioritas' => 'required|in:biasa,urgent,sangat_urgent',
+        ]);
+
+        $laporan = FormulirLaporan::findOrFail($formulirId);
+        $prioritasLama = $laporan->prioritas ?? 'biasa';
+        $prioritasBaru = $request->prioritas;
+
+        if ($prioritasLama === $prioritasBaru) {
+            return back()->with('info', 'Prioritas laporan tidak ada perubahan.');
+        }
+
+        $now = now();
+        $laporan->update([
+            'prioritas' => $prioritasBaru,
+            'updated_at' => $now,
+        ]);
+
+        Tracking::create([
+            'tracking_id' => (string) Str::uuid(),
+            'formulir_id' => $formulirId,
+            'aktor_id' => auth()->user()->user_id,
+            'jenis_event' => 'prioritas_diubah',
+            'pesan_narasi' => "Admin Jurusan mengubah prioritas dari {$prioritasLama} menjadi {$prioritasBaru}.",
+            'created_at' => $now,
+        ]);
+
+        return back()->with('success', 'Prioritas laporan berhasil diubah.');
     }
 }

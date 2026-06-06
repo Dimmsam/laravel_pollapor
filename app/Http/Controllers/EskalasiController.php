@@ -41,28 +41,39 @@ class EskalasiController extends Controller
 
         $laporan->update([
             'status' => FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT,
-            'updated_at' => $now,
             'is_locked' => true,
+            'updated_at' => $now,
         ]);
 
         Tracking::create([
             'tracking_id' => (string) Str::uuid(),
             'formulir_id' => $formulirId,
             'aktor_id' => auth()->user()->user_id,
-            'jenis_event' => Tracking::EVENT_ESKALASI_DISETUJUI,
+            'jenis_event' => Tracking::EVENT_DITERUSKAN_KE_PUSAT,
             'pesan_narasi' => 'Admin Jurusan meneruskan laporan ke pusat (UPT-PP). '
                 . ($request->catatan ? 'Catatan: ' . $request->catatan : ''),
             'created_at' => $now,
         ]);
 
-        // Jika ada penanganan, tandai teknisi kembali tersedia
+        // Jika ada penanganan, tandai teknisi kembali tersedia dan beri notifikasi
         if ($laporan->penanganan) {
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'notifikasi_id' => (string) Str::uuid(),
+                'penerima_id' => $laporan->penanganan->teknisi_id,
+                'formulir_id' => $formulirId,
+                'judul' => 'Eskalasi Diteruskan ke Kajur: ' . $laporan->nama_sarana,
+                'pesan' => 'Admin Jurusan telah meneruskan eskalasi Anda ke Kepala Jurusan.',
+                'tipe' => 'info',
+                'is_read' => false,
+                'created_at' => $now,
+            ]);
+
             Pengguna::where('user_id', $laporan->penanganan->teknisi_id)
                 ->update(['is_busy' => false]);
         }
 
         return redirect()->route('eskalasi.index')
-            ->with('success', 'Laporan berhasil diteruskan ke pusat.');
+            ->with('success', 'Laporan eskalasi berhasil diteruskan ke Kepala Jurusan.');
     }
 
     public function tolakEskalasi(Request $request, string $formulirId)
@@ -75,13 +86,13 @@ class EskalasiController extends Controller
         $now = now();
 
         $laporan->update([
-            'status' => FormulirLaporan::STATUS_SEDANG_DIKERJAKAN,
+            'status' => 'ditolak_eskalasi', // set status_formulir ke ditolak_eskalasi
             'updated_at' => $now,
         ]);
 
         if ($laporan->penanganan) {
             $laporan->penanganan->update([
-                'status_penanganan' => Penanganan::STATUS_MULAI,
+                'status_penanganan' => Penanganan::STATUS_DITOLAK_ESKALASI ?? 'ditolak_eskalasi',
                 'updated_at' => $now,
             ]);
         }
@@ -94,6 +105,19 @@ class EskalasiController extends Controller
             'pesan_narasi' => 'Admin Jurusan menolak eskalasi. Alasan: ' . $request->alasan_tolak,
             'created_at' => $now,
         ]);
+
+        if ($laporan->penanganan) {
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'notifikasi_id' => (string) Str::uuid(),
+                'penerima_id' => $laporan->penanganan->teknisi_id,
+                'formulir_id' => $formulirId,
+                'judul' => 'Eskalasi Ditolak: ' . $laporan->nama_sarana,
+                'pesan' => 'Admin Jurusan menolak eskalasi Anda. Alasan: ' . $request->alasan_tolak,
+                'tipe' => 'warning',
+                'is_read' => false,
+                'created_at' => $now,
+            ]);
+        }
 
         return redirect()->route('eskalasi.index')
             ->with('success', 'Eskalasi ditolak. Laporan dikembalikan ke teknisi.');

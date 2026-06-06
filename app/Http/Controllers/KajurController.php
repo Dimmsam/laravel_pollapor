@@ -54,8 +54,19 @@ class KajurController extends Controller
             'created_at' => $now,
         ]);
 
-        // Jika ada penanganan, tandai teknisi kembali tersedia
+        // Jika ada penanganan, tandai teknisi kembali tersedia dan kirim notifikasi
         if ($laporan->penanganan) {
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'notifikasi_id' => (string) Str::uuid(),
+                'penerima_id' => $laporan->penanganan->teknisi_id,
+                'formulir_id' => $formulirId,
+                'judul' => 'Eskalasi Disetujui: ' . $laporan->nama_sarana,
+                'pesan' => 'Kepala Jurusan menyetujui eskalasi Anda dan meneruskannya ke UPT-PP.',
+                'tipe' => 'success',
+                'is_read' => false,
+                'created_at' => $now,
+            ]);
+
             Pengguna::where('user_id', $laporan->penanganan->teknisi_id)
                 ->update(['is_busy' => false]);
         }
@@ -75,6 +86,7 @@ class KajurController extends Controller
 
         $laporan->update([
             'status' => FormulirLaporan::STATUS_SEDANG_DIKERJAKAN,
+            'is_locked' => false,
             'updated_at' => $now,
         ]);
 
@@ -94,6 +106,18 @@ class KajurController extends Controller
             'created_at' => $now,
         ]);
 
+        if ($laporan->penanganan) {
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'notifikasi_id' => (string) Str::uuid(),
+                'penerima_id' => $laporan->penanganan->teknisi_id,
+                'formulir_id' => $formulirId,
+                'judul' => 'Eskalasi Ditolak Kajur: ' . $laporan->nama_sarana,
+                'pesan' => 'Kepala Jurusan menolak eskalasi Anda. Alasan: ' . $request->alasan_tolak,
+                'tipe' => 'warning',
+                'is_read' => false,
+                'created_at' => $now,
+            ]);
+        }
         return redirect()->route('kajur.index')
             ->with('success', 'Eskalasi ditolak. Laporan dikembalikan ke teknisi.');
     }
