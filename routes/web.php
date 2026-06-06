@@ -41,6 +41,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/kajur/{formulirId}', [KajurController::class, 'show'])->name('kajur.show');
         Route::post('/kajur/{formulirId}/setujui', [KajurController::class, 'setujuiEskalasi'])->name('kajur.setujui');
         Route::post('/kajur/{formulirId}/tolak', [KajurController::class, 'tolakEskalasi'])->name('kajur.tolak');
+        Route::post('/kajur/{formulirId}/tolak', [KajurController::class, 'tolakEskalasi'])->name('kajur.tolak');
     });
 
     // Berita Acara & Kunci Laporan (UC-08)

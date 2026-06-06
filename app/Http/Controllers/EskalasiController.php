@@ -40,17 +40,17 @@ class EskalasiController extends Controller
         $now = now();
 
         $laporan->update([
-            'status' => FormulirLaporan::STATUS_MENUNGGU_PERSETUJUAN_KAJUR,
-            'updated_at' => $now,
+            'status' => FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT,
             'is_locked' => true,
+            'updated_at' => $now,
         ]);
 
         Tracking::create([
             'tracking_id' => (string) Str::uuid(),
             'formulir_id' => $formulirId,
             'aktor_id' => auth()->user()->user_id,
-            'jenis_event' => Tracking::EVENT_ESKALASI_DISETUJUI,
-            'pesan_narasi' => 'Admin Jurusan meneruskan laporan eskalasi ke Kepala Jurusan. '
+            'jenis_event' => Tracking::EVENT_DITERUSKAN_KE_PUSAT,
+            'pesan_narasi' => 'Admin Jurusan meneruskan laporan ke pusat (UPT-PP). '
                 . ($request->catatan ? 'Catatan: ' . $request->catatan : ''),
             'created_at' => $now,
         ]);

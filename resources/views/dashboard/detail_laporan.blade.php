@@ -424,6 +424,7 @@ $isDitolak = $laporan->trackings->contains('jenis_event', 'laporan_ditolak');
 
     </div>
 </div>
+
 </div>
 </div>
 
@@ -499,6 +500,7 @@ $isDitolak = $laporan->trackings->contains('jenis_event', 'laporan_ditolak');
     </div>
 </div>
 
+
 {{-- MODAL TOLAK LAPORAN --}}
 <div id="modalTolak" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform scale-95 transition-transform duration-200">
@@ -551,4 +553,5 @@ $isDitolak = $laporan->trackings->contains('jenis_event', 'laporan_ditolak');
         setTimeout(() => modal.classList.add('hidden'), 200);
     }
 </script>
+
 @endsection

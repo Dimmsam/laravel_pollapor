@@ -77,12 +77,65 @@ class PenugasanController extends Controller
                 'created_at' => $now,
             ]);
 
-            return redirect()->route('dashboard')
+            return redirect()->route('laporan.index')
                 ->with('success', 'Teknisi berhasil ditugaskan.');
         });
     }
 
 
+    public function tolakLaporan(Request $request, string $formulirId)
+    {
+        $request->validate(['alasan_tolak' => 'required|string|max:500']);
+
+        $laporan = FormulirLaporan::findOrFail($formulirId);
+        $now = now();
+
+        $laporan->update([
+            'status' => FormulirLaporan::STATUS_MENUNGGU,
+            'is_locked' => true,
+            'updated_at' => $now,
+        ]);
+
+        Tracking::create([
+            'tracking_id' => (string) Str::uuid(),
+            'formulir_id' => $formulirId,
+            'aktor_id' => auth()->user()->user_id,
+            'jenis_event' => Tracking::EVENT_LAPORAN_DITOLAK,
+            'pesan_narasi' => 'Admin menolak laporan. Alasan: ' . $request->alasan_tolak,
+            'created_at' => $now,
+        ]);
+
+        return redirect()->route('laporan.index')
+            ->with('success', 'Laporan berhasil ditolak.');
+    }
+
+    public function ubahStatus(Request $request, string $formulirId)
+    {
+        $request->validate([
+            'status' => 'required|string',
+            'alasan' => 'required|string|max:500',
+        ]);
+
+        $laporan = FormulirLaporan::findOrFail($formulirId);
+        $now = now();
+
+        $laporan->update([
+            'status' => $request->status,
+            'updated_at' => $now,
+        ]);
+
+        // Catat sebagai event diterima admin (fallback) atau event lain sesuai kebutuhan
+        Tracking::create([
+            'tracking_id' => (string) Str::uuid(),
+            'formulir_id' => $formulirId,
+            'aktor_id' => auth()->user()->user_id,
+            'jenis_event' => Tracking::EVENT_LAPORAN_DITERIMA,
+            'pesan_narasi' => 'Admin mengubah status secara manual menjadi ' . $request->status . '. Alasan: ' . $request->alasan,
+            'created_at' => $now,
+        ]);
+
+        return redirect()->back()->with('success', 'Status laporan berhasil diubah secara manual.');
+    }
 
     public function tolak(Request $request, string $formulirId)
     {

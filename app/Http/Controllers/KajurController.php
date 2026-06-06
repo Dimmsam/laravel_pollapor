@@ -14,7 +14,7 @@ class KajurController extends Controller
     public function index()
     {
         $laporans = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan.teknisi'])
-            ->menungguPersetujuanKajur()
+            ->where('status', FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT)
             ->orderBy('updated_at', 'desc')
             ->paginate(15);
 
@@ -85,14 +85,14 @@ class KajurController extends Controller
         $now = now();
 
         $laporan->update([
-            'status' => 'ditolak_eskalasi', // set status_formulir ke ditolak_eskalasi
+            'status' => FormulirLaporan::STATUS_SEDANG_DIKERJAKAN,
             'is_locked' => false,
             'updated_at' => $now,
         ]);
 
         if ($laporan->penanganan) {
             $laporan->penanganan->update([
-                'status_penanganan' => \App\Models\Penanganan::STATUS_DITOLAK_ESKALASI ?? 'ditolak_eskalasi',
+                'status_penanganan' => Penanganan::STATUS_MULAI,
                 'updated_at' => $now,
             ]);
         }
