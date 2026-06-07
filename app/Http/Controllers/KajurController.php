@@ -85,14 +85,14 @@ class KajurController extends Controller
         $now = now();
 
         $laporan->update([
-            'status' => FormulirLaporan::STATUS_SEDANG_DIKERJAKAN,
+            'status' => FormulirLaporan::STATUS_DITOLAK_ESKALASI,
             'is_locked' => false,
             'updated_at' => $now,
         ]);
 
         if ($laporan->penanganan) {
             $laporan->penanganan->update([
-                'status_penanganan' => Penanganan::STATUS_MULAI,
+                'status_penanganan' => Penanganan::STATUS_DITOLAK_ESKALASI,
                 'updated_at' => $now,
             ]);
         }
