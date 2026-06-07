@@ -13,9 +13,9 @@ class EskalasiController extends Controller
 {
     public function index()
     {
-        // Laporan yang sudah diteruskan untuk divalidasi admin/kajur
+        // Laporan yang sudah diteruskan untuk divalidasi admin
         $laporans = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan.teknisi'])
-            ->where('status', FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT)
+            ->where('status', FormulirLaporan::STATUS_MENUNGGU_ESKALASI_JURUSAN)
             ->orderBy('updated_at', 'desc')
             ->paginate(15);
 
@@ -40,7 +40,7 @@ class EskalasiController extends Controller
         $now = now();
 
         $laporan->update([
-            'status' => FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT,
+            'status' => FormulirLaporan::STATUS_MENUNGGU_PERSETUJUAN_KAJUR,
             'is_locked' => true,
             'updated_at' => $now,
         ]);

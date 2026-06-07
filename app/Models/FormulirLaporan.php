@@ -51,6 +51,7 @@ class FormulirLaporan extends Model
     const STATUS_DITOLAK_ESKALASI = 'ditolak_eskalasi';
     const STATUS_SELESAI = 'selesai';
     const STATUS_MENUNGGU_PERSETUJUAN_KAJUR = 'menunggu_persetujuan_kajur';
+    const STATUS_MENUNGGU_ESKALASI_JURUSAN = 'menunggu_eskalasi_jurusan';
     const STATUS_DITERUSKAN_KE_PUSAT = 'diteruskan_ke_pusat';
 
     // ─── Scopes ────────────────────────────────────────────────────────────
@@ -133,6 +134,7 @@ class FormulirLaporan extends Model
             self::STATUS_SEDANG_DIKERJAKAN => 'Sedang Dikerjakan',
             self::STATUS_DITOLAK_ESKALASI => 'Eskalasi Ditolak',
             self::STATUS_SELESAI => 'Selesai',
+            self::STATUS_MENUNGGU_ESKALASI_JURUSAN => 'Menunggu Eskalasi Admin',
             self::STATUS_MENUNGGU_PERSETUJUAN_KAJUR => 'Menunggu Persetujuan Kajur',
             self::STATUS_DITERUSKAN_KE_PUSAT => 'Diteruskan ke Pusat',
             default => ucfirst(str_replace('_', ' ', $this->status ?? '')),
@@ -147,6 +149,7 @@ class FormulirLaporan extends Model
             self::STATUS_SEDANG_DIKERJAKAN => 'orange',
             self::STATUS_DITOLAK_ESKALASI => 'red',
             self::STATUS_SELESAI => 'green',
+            self::STATUS_MENUNGGU_ESKALASI_JURUSAN => 'purple',
             self::STATUS_MENUNGGU_PERSETUJUAN_KAJUR => 'purple',
             self::STATUS_DITERUSKAN_KE_PUSAT => 'red',
             default => 'gray',

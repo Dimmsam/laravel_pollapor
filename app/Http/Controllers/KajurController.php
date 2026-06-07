@@ -14,7 +14,7 @@ class KajurController extends Controller
     public function index()
     {
         $laporans = FormulirLaporan::with(['pelapor', 'lokasi', 'penanganan.teknisi'])
-            ->where('status', FormulirLaporan::STATUS_DITERUSKAN_KE_PUSAT)
+            ->where('status', FormulirLaporan::STATUS_MENUNGGU_PERSETUJUAN_KAJUR)
             ->orderBy('updated_at', 'desc')
             ->paginate(15);
 

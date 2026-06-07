@@ -91,7 +91,7 @@ class PenugasanController extends Controller
         $now = now();
 
         $laporan->update([
-            'status' => FormulirLaporan::STATUS_MENUNGGU,
+            'status' => 'ditolak',
             'is_locked' => true,
             'updated_at' => $now,
         ]);
